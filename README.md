@@ -1,44 +1,97 @@
-# Rollyy EV Pass Demo
+# Rollyy — EV Mobility App
 
-Voice-first EV charging: say your intent ("Charge to 80% near my office at 6pm"),
-get matched to a charger, pay, receive a tokenised QR pass, and watch a live
-charging session simulate to completion.
+A mobile-first app for EV drivers to find and reserve charging points, parking
+spots, maintenance shops, and on-demand Rollyy charging bots — all in one place.
 
-## Stack
-- React 18 + Vite, mobile-first PWA (`vite-plugin-pwa`)
-- Live public APIs: [OpenChargeMap](https://openchargemap.org/site/develop/api) (station discovery),
-  [Nominatim](https://nominatim.org/release-docs/latest/api/Search/) (geocoding),
-  Web Speech API (voice input), Stripe test mode (payment UI)
-- Simulated Rollyy micro-services in `src/services/rollyy*.js` (orchestration, session, settlement) —
-  see `docs/rollyy-api-contracts.md` for the future real-API contracts these mocks stand in for.
+## Architecture
+
+Two independent apps:
+
+```
+client/   React 18 + Vite mobile web app (bottom tab navigation)
+server/   Express API (live open-data integrations + in-memory reservations)
+```
+
+The client never calls third-party APIs directly — everything goes through the
+Express server, so API keys stay server-side and responses are normalised into
+one consistent shape for the UI.
+
+## Features
+
+- **Charging points** — live stations from OpenChargeMap
+- **Charging bot** — compare a fleet of nearby Rollyy bots (distance, ETA,
+  battery, price), reserve and pay for one, and track it driving to your vehicle
+- **Parking** — nearby parking areas from OpenStreetMap (Overpass)
+- **Maintenance** — nearby repair shops from OpenStreetMap, ranked against a
+  free-text description of your issue (e.g. "brake squeal") via keyword/tag matching
+- **Car wash** — nearby car washes from OpenStreetMap
+- **Weather** — current conditions for the searched location (Open-Meteo)
+- **Map** — every result list is plotted on a live Leaflet/OpenStreetMap view
+- **Reservations** — a shared reserve → pay → confirm flow across charging,
+  parking, maintenance, car wash, and bot dispatch (simulated payment processor)
+
+No AI is used in this iteration — search/matching is deterministic (geocoding,
+distance sorting, keyword-based specialty detection). That's intentionally left
+for a future iteration.
+
+## Live data sources (no API key required unless noted)
+
+| Source | Used for |
+|---|---|
+| [OpenChargeMap](https://openchargemap.org) | Charging stations *(free API key required)* |
+| [OpenStreetMap Overpass](https://overpass-api.de) | Parking, maintenance, car wash |
+| [Nominatim](https://nominatim.org) | Geocoding / reverse geocoding |
+| [Open-Meteo](https://open-meteo.com) | Weather |
+
+Public Overpass mirrors can rate-limit under heavy use; the server retries
+across three mirrors and, only if every mirror fails, falls back to clearly
+labeled ("Estimated") placeholder results so the app never dead-ends.
+
+Rollyy bot fleet, availability, and dispatch tracking are simulated in-memory
+on the server (`botDispatch.service.js`) — there is no external Rollyy API
+integration yet.
 
 ## Getting started
+
 ```bash
+# Server
+cd server
 npm install
-cp .env.example .env.local   # add your OpenChargeMap + Stripe test keys
-npm run dev
+echo "PORT=4000\nOPENCHARGEMAP_API_KEY=your_key_here" > .env
+npm run dev          # http://localhost:4000
+
+# Client (separate terminal)
+cd client
+npm install
+npm run dev           # http://localhost:5173, proxies /api to the server
 ```
 
 ## Project layout
+
 ```
-src/
-  components/   # Presentational + flow components (VoiceCapture, StationList, Booking, Pass, SessionMonitor, Receipt)
-  screens/      # The 6 demo screens (see docs/demo-script.md), wire components + services together
-  services/     # API integrations: nominatim, openChargeMap, speech, stripe, rollyy* (simulated)
-  state/        # AppContext: in-memory + localStorage persisted app state
-  utils/        # jwt (EV Pass token), geo, format helpers
-  config/       # env-driven config
-docs/           # architecture, API map, demo script, roadmap
+server/src/
+  routes/       geocode, charging, parking, maintenance, carwash, weather, reservations
+  services/     nominatim, openChargeMap, overpass, weather, recommendation, botDispatch, reservation
+  middleware/   errorHandler
+  utils/        distance
+
+client/src/
+  pages/        Home, Charging, Parking, Maintenance, CarWash, BotFleet, BotDispatch,
+                Reservation, Payment, ReservationConfirmed
+  components/   TopBar, BottomNav, LocationBar, MapView, PlaceCard, MechanicCard,
+                WeatherChip, StateBlocks
+  context/      LocationContext (shared searched location + weather across tabs)
+  api/          client.js — typed fetch wrapper for every server endpoint
 ```
 
-## Demo flow
-See `docs/demo-script.md` for the full walkthrough script and `docs/architecture.md` for
-system design. Test payments use Stripe test card `4242 4242 4242 4242`.
+## Notes on the simulated pieces
 
-## Deployment
-Deploys to Vercel (see `vercel.json`). Set `VITE_OPENCHARGEMAP_API_KEY` and
-`VITE_STRIPE_PUBLISHABLE_KEY` as environment variables in the Vercel dashboard.
+Two things are intentionally simulated rather than calling real external
+services, since this is an MVP:
 
-## Status
-This is a hackathon scaffold: Rollyy's booking/session/settlement APIs are mocked in
-`src/services/rollyy*.js`. See `docs/roadmap.md` for the plan to swap in real endpoints.
+- **Payments** — `reservation.service.js` validates card shape only (Luhn-free,
+  no real charge). Swap for a real processor (e.g. Stripe) before production.
+- **Rollyy bot fleet/dispatch** — `botDispatch.service.js` generates a small
+  in-memory fleet and simulates arrival progress over time. Swap for Rollyy's
+  real dispatch API when available.
+
