@@ -20,6 +20,7 @@ export default function LocationBar() {
           onChange={(event) => setQuery(event.target.value)}
           placeholder={label}
           aria-label="Search location"
+          autoComplete="off"
         />
         <button type="button" className="icon-button" onClick={useDeviceLocation} aria-label="Use current location" title="Use current location">
           ⌖
@@ -28,9 +29,6 @@ export default function LocationBar() {
           {status === 'loading' ? '…' : 'Go'}
         </button>
       </div>
-      <p className="location-bar-current">
-        <span className="dot" /> {label}
-      </p>
       <WeatherChip weather={weather} />
       {status === 'error' && error && <p className="error-banner">{error}</p>}
     </form>

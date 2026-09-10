@@ -9,6 +9,7 @@ import carwashRoutes from './routes/carwash.routes.js';
 import weatherRoutes from './routes/weather.routes.js';
 import reservationRoutes from './routes/reservations.routes.js';
 import intentRoutes from './routes/intent.routes.js';
+import speechRoutes from './routes/speech.routes.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 
 export function createApp() {
@@ -28,6 +29,7 @@ export function createApp() {
   app.use('/api/weather', weatherRoutes);
   app.use('/api/reservations', reservationRoutes);
   app.use('/api/intent', intentRoutes);
+  app.use('/api/speech', speechRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

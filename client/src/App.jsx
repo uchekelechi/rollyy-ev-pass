@@ -12,6 +12,7 @@ import ParkingPage from './pages/ParkingPage.jsx';
 import MaintenancePage from './pages/MaintenancePage.jsx';
 import CarWashPage from './pages/CarWashPage.jsx';
 import TripsPage from './pages/TripsPage.jsx';
+import WeatherPage from './pages/WeatherPage.jsx';
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
             <Route path="/maintenance" element={<MaintenancePage />} />
             <Route path="/carwash" element={<CarWashPage />} />
             <Route path="/trips" element={<TripsPage />} />
+            <Route path="/weather" element={<WeatherPage />} />
           </Routes>
         </main>
         <BottomNav />

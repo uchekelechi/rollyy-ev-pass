@@ -26,6 +26,20 @@ export const api = {
   carwash: (lat, lon) => request(`/carwash${query({ lat, lon })}`),
   weather: (lat, lon) => request(`/weather${query({ lat, lon })}`),
   classifyIntent: (q) => request(`/intent${query({ q })}`),
+  // Raw audio, not JSON, and never throws — callers fall back to browser speech on any failure.
+  synthesizeSpeech: async (text) => {
+    try {
+      const response = await fetch(`${BASE_URL}/speech`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+      if (!response.ok) return null;
+      return await response.blob();
+    } catch {
+      return null;
+    }
+  },
   createReservation: (payload) =>
     request('/reservations', {
       method: 'POST',
