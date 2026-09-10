@@ -44,8 +44,6 @@ a { color: inherit; text-decoration: none; }
 .location-bar-row { display: flex; gap: 8px; }
 .location-bar-row input { min-width: 0; flex: 1; padding: 11px 12px; border: 1px solid #2c3542; border-radius: 8px; background: #161d26; color: #f5f2e9; font-size: .88rem; }
 .location-bar-row input:focus { outline: none; border-color: #3c8bd0; }
-.location-bar-current { display: flex; align-items: center; gap: 7px; margin: 9px 0 0; color: #8b96a2; font-family: 'DM Mono', monospace; font-size: .68rem; }
-.location-bar-current .dot { width: 6px; height: 6px; border-radius: 50%; background: #3c8bd0; }
 .weather-chip { display: flex; align-items: center; gap: 6px; margin: 6px 0 0; padding: 0; background: none; border: 0; color: #96a2ae; font-family: 'DM Mono', monospace; font-size: .68rem; }
 .weather-chip-compact { margin: 0; flex-shrink: 0; padding: 8px 14px; border-radius: 999px; background: #1a2230; color: #f5f2e9; font-size: .92rem; font-weight: 600; }
 .weather-chip-compact span { font-size: 1.15rem; }

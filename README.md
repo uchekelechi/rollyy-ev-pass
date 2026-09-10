@@ -50,6 +50,7 @@ if it isn't set, times out, or the account has no credits/quota:
 |---|---|---|
 | Home voice/text request → service routing | `intent.service.js` classifies free text into a service + place/issue | Keyword/regex matcher (`classifyIntentLocally`) |
 | Maintenance issue triage | `ai.service.js` diagnoses the problem and picks specialties | Keyword/tag matcher (`recommendation.service.js`) |
+| Spoken replies on the home screen | `speech.service.js` synthesizes voice via ElevenLabs (`ELEVENLABS_API_KEY`) | Browser `SpeechSynthesis` API |
 
 The app is fully usable and demo-safe with zero AI configuration — this is
 additive, not a dependency.
@@ -84,6 +85,10 @@ OPENCHARGEMAP_API_KEY=your_key_here
 # Optional — enables AI routing/triage; omit to use the deterministic fallback
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-4o-mini
+# Optional — enables spoken replies on the home screen; omit to use browser TTS
+ELEVENLABS_API_KEY=
+ELEVENLABS_VOICE_ID=
+ELEVENLABS_MODEL_ID=eleven_turbo_v2_5
 EOF
 npm run dev          # http://localhost:4000
 
@@ -100,15 +105,15 @@ Port 4000 only serves JSON (`/health`, `/api/*`) — open the client's port
 
 ```
 server/src/
-  routes/       geocode, charging, parking, maintenance, carwash, weather, reservations, intent
+  routes/       geocode, charging, parking, maintenance, carwash, weather, reservations, intent, speech
   services/     nominatim, openChargeMap, overpass, weather, recommendation, botDispatch,
-                reservation, ai, intent
+                reservation, ai, intent, speech
   middleware/   errorHandler
   utils/        distance
 
 client/src/
   pages/        Home (voice/text assistant), Charging, Parking, Maintenance, CarWash,
-                BotFleet, BotDispatch, Reservation, Payment, ReservationConfirmed, Trips
+                BotFleet, BotDispatch, Reservation, Payment, ReservationConfirmed, Trips, Weather
   components/   TopBar, BottomNav, LocationBar, MapView, PlaceCard, MechanicCard,
                 WeatherChip, StateBlocks
   context/      LocationContext (shared searched location + weather across tabs)

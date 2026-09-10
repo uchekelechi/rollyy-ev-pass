@@ -1,19 +1,7 @@
 import TopBar from '../components/TopBar.jsx';
 import { EmptyState } from '../components/StateBlocks.jsx';
 import { useLocation } from '../context/LocationContext.jsx';
-
-const CONDITION_ICON = {
-  'Clear sky': '☀️', 'Mostly clear': '🌤️', 'Partly cloudy': '⛅', 'Overcast': '☁️',
-  'Fog': '🌫️', 'Depositing rime fog': '🌫️'
-};
-
-function iconFor(condition) {
-  if (CONDITION_ICON[condition]) return CONDITION_ICON[condition];
-  if (/rain|drizzle|shower/i.test(condition)) return '🌧️';
-  if (/snow/i.test(condition)) return '❄️';
-  if (/thunder/i.test(condition)) return '⛈️';
-  return '🌡️';
-}
+import { iconForCondition } from '../utils/weatherIcon.js';
 
 // Detailed weather readout for the current searched/device location; reuses the shared
 // LocationContext value so it always matches what's shown as a chip elsewhere in the app.
@@ -29,7 +17,7 @@ export default function WeatherPage() {
         <div className="weather-detail">
           <p className="weather-detail-place">{label}</p>
           <div className="weather-detail-hero">
-            <span aria-hidden="true">{iconFor(weather.condition)}</span>
+            <span aria-hidden="true">{iconForCondition(weather.condition)}</span>
             <span className="weather-detail-temp">{Math.round(weather.temperatureC)}°C</span>
           </div>
           <p className="weather-detail-condition">{weather.condition}</p>
